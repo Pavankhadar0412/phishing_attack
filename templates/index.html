@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Website Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-shield-check"></i> Phishing Detector
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/history">History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold text-white mb-4">
+                        <i class="bi bi-shield-lock"></i> Protect Yourself from Phishing
+                    </h1>
+                    <p class="lead text-white-50 mb-4">
+                        Advanced AI-powered phishing website detection. Scan URLs instantly to identify malicious websites and protect your personal information.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#scan-section" class="btn btn-primary btn-lg">
+                            <i class="bi bi-search"></i> Start Scanning
+                        </a>
+                        <a href="/about" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-info-circle"></i> Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-image text-center">
+                        <i class="bi bi-shield-check display-1 text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scan Section -->
+    <section id="scan-section" class="scan-section py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card scan-card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-4">
+                                <i class="bi bi-search"></i> Scan URL
+                            </h2>
+                            
+                            {% if error %}
+                            <div class="alert alert-danger" role="alert">
+                                <i class="bi bi-exclamation-triangle"></i> {{ error }}
+                            </div>
+                            {% endif %}
+                            
+                            <form id="scanForm">
+                                <div class="mb-4">
+                                    <label for="urlInput" class="form-label">Enter URL to scan:</label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </span>
+                                        <input type="url" class="form-control" id="urlInput" 
+                                               placeholder="https://example.com" required>
+                                        <button class="btn btn-primary" type="submit" id="scanBtn">
+                                            <i class="bi bi-search"></i> Scan
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Enter the complete URL including http:// or https://</div>
+                                </div>
+                            </form>
+
+                            <!-- Loading Animation -->
+                            <div id="loadingSection" class="text-center d-none">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3">Analyzing URL...</p>
+                            </div>
+
+                            <!-- Result Section -->
+                            <div id="resultSection" class="d-none">
+                                <div class="card result-card">
+                                    <div class="card-body">
+                                        <h4 class="card-title mb-3">Scan Results</h4>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div id="statusIndicator" class="text-center p-4 rounded mb-3">
+                                                    <i id="statusIcon" class="display-1"></i>
+                                                    <h3 id="statusText" class="mt-2"></h3>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Confidence Score:</label>
+                                                    <div class="progress" style="height: 30px;">
+                                                        <div id="confidenceBar" class="progress-bar" role="progressbar" 
+                                                             style="width: 0%"></div>
+                                                    </div>
+                                                    <p id="confidenceText" class="text-center mt-2 fw-bold"></p>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">Risk Level:</label>
+                                                    <span id="riskLevel" class="badge fs-6"></span>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">URL:</label>
+                                                    <p id="scannedUrl" class="text-break small"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mt-4">
+                                            <div class="col-md-6">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Phishing Probability</h6>
+                                                        <h3 id="phishingProb" class="text-danger"></h3>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Legitimate Probability</h6>
+                                                        <h3 id="legitimateProb" class="text-success"></h3>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="virustotalSection" class="mt-4 d-none">
+                                            <div class="alert alert-info">
+                                                <h6><i class="bi bi-shield-check"></i> VirusTotal Score</h6>
+                                                <p id="virustotalScore"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Key Features</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-cpu display-4 text-primary mb-3"></i>
+                            <h5 class="card-title">AI-Powered Detection</h5>
+                            <p class="card-text">Advanced machine learning algorithms analyze URLs for phishing indicators with high accuracy.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-lightning display-4 text-warning mb-3"></i>
+                            <h5 class="card-title">Real-Time Analysis</h5>
+                            <p class="card-text">Instant URL scanning with comprehensive feature extraction and threat assessment.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-database display-4 text-success mb-3"></i>
+                            <h5 class="card-title">Scan History</h5>
+                            <p class="card-text">Track your scans with detailed history and export capabilities for analysis.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats-section py-5">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-4 mb-4">
+                    <div class="stat-card">
+                        <i class="bi bi-graph-up display-4 text-primary mb-3"></i>
+                        <h3 class="display-4 fw-bold">20+</h3>
+                        <p class="lead">Features Analyzed</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="stat-card">
+                        <i class="bi bi-percent display-4 text-success mb-3"></i>
+                        <h3 class="display-4 fw-bold">95%+</h3>
+                        <p class="lead">Detection Accuracy</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="stat-card">
+                        <i class="bi bi-clock display-4 text-warning mb-3"></i>
+                        <h3 class="display-4 fw-bold">< 1s</h3>
+                        <p class="lead">Scan Time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Phishing Website Detector</h5>
+                    <p class="text-white-50">Protect yourself from online threats with our advanced AI-powered detection system.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-white-50">&copy; 2024 Phishing Detector. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/login" method="POST">
+                        <div class="mb-3">
+                            <label for="loginUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="loginUsername" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/register" method="POST">
+                        <div class="mb-3">
+                            <label for="registerUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="registerUsername" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

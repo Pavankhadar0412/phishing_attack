@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Phishing Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-shield-check"></i> Phishing Detector
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/about">About</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/history">History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- About Content -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="mb-4 text-center">
+                    <i class="bi bi-info-circle"></i> About Phishing Detector
+                </h1>
+                
+                <!-- Introduction -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">What is Phishing?</h4>
+                        <p class="card-text">
+                            Phishing is a type of cyber attack where attackers impersonate legitimate organizations 
+                            to steal sensitive information such as usernames, passwords, and credit card details. 
+                            These attacks often come in the form of deceptive emails, messages, or websites that 
+                            appear trustworthy but are designed to trick victims.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Our Solution -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">Our Solution</h4>
+                        <p class="card-text">
+                            Phishing Detector is an AI-powered web application that helps you identify malicious 
+                            websites before you fall victim to phishing attacks. Using advanced machine learning 
+                            algorithms, our system analyzes URLs and extracts over 20 different features to 
+                            determine the likelihood of a website being malicious.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">Key Features</h4>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <i class="bi bi-cpu text-primary"></i> 
+                                <strong>AI-Powered Detection:</strong> Machine learning models trained on thousands of phishing and legitimate URLs
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-speedometer2 text-success"></i> 
+                                <strong>Real-Time Analysis:</strong> Instant URL scanning with comprehensive feature extraction
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-graph-up text-warning"></i> 
+                                <strong>Detailed Reports:</strong> Confidence scores, risk levels, and probability breakdowns
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-database text-info"></i> 
+                                <strong>Scan History:</strong> Track your scans with detailed history and export capabilities
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-shield-check text-danger"></i> 
+                                <strong>VirusTotal Integration:</strong> Optional integration with VirusTotal API for enhanced detection
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-palette text-secondary"></i> 
+                                <strong>Modern UI:</strong> Beautiful, responsive interface with dark mode support
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- How It Works -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">How It Works</h4>
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="step-number">1</div>
+                                <h5>Enter URL</h5>
+                                <p class="text-muted">Paste the URL you want to check into the scan box</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="step-number">2</div>
+                                <h5>Analysis</h5>
+                                <p class="text-muted">Our AI extracts 20+ features and analyzes the URL</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="step-number">3</div>
+                                <h5>Get Results</h5>
+                                <p class="text-muted">Receive instant feedback with confidence scores</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Analyzed -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">Features We Analyze</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><i class="bi bi-check-circle text-success"></i> URL length and structure</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Domain characteristics</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Presence of IP addresses</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> HTTPS/HTTP protocol</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Special characters count</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Suspicious keywords</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> URL shortening services</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Subdomain count</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Path depth</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Query parameters</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><i class="bi bi-check-circle text-success"></i> Entropy calculation</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Brand name detection</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Homograph characters</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> TLD analysis</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Digit and letter ratios</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Special symbol presence</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Port number detection</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> @ symbol presence</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Executable file detection</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> And more...</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technology Stack -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">Technology Stack</h4>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <h6>Backend</h6>
+                                <ul class="list-unstyled text-muted">
+                                    <li>Python</li>
+                                    <li>Flask</li>
+                                    <li>Scikit-learn</li>
+                                    <li>SQLAlchemy</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <h6>Machine Learning</h6>
+                                <ul class="list-unstyled text-muted">
+                                    <li>Random Forest</li>
+                                    <li>Decision Tree</li>
+                                    <li>XGBoost</li>
+                                    <li>Feature Engineering</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <h6>Frontend</h6>
+                                <ul class="list-unstyled text-muted">
+                                    <li>HTML5</li>
+                                    <li>Bootstrap 5</li>
+                                    <li>JavaScript</li>
+                                    <li>Chart.js</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Notice -->
+                <div class="card bg-warning bg-opacity-10 mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title text-warning">
+                            <i class="bi bi-exclamation-triangle"></i> Security Notice
+                        </h4>
+                        <p class="card-text">
+                            While our system provides advanced phishing detection capabilities, no tool can guarantee 
+                            100% accuracy. Always exercise caution when clicking on links, especially from unknown sources. 
+                            Verify the authenticity of websites through official channels before entering sensitive information.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Contact -->
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h4 class="card-title">Get In Touch</h4>
+                        <p class="card-text">
+                            Have questions or suggestions? We'd love to hear from you!
+                        </p>
+                        <a href="/" class="btn btn-primary">
+                            <i class="bi bi-house"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Phishing Website Detector</h5>
+                    <p class="text-white-50">Protect yourself from online threats with our advanced AI-powered detection system.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-white-50">&copy; 2024 Phishing Detector. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
