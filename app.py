@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from flask_mail import Mail, Message
 import joblib
 import os
 import datetime
@@ -30,11 +31,20 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
+# Email configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@phishingdetector.com')
+
 # Initialize extensions
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+mail = Mail(app)
 
 # Rate limiting storage
 rate_limits = {}
@@ -48,6 +58,8 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    reset_token = db.Column(db.String(100), nullable=True)
+    reset_token_expiration = db.Column(db.DateTime, nullable=True)
     scans = db.relationship('ScanHistory', backref='user', lazy=True)
 
 class ScanHistory(db.Model):
@@ -463,6 +475,79 @@ def register():
         return redirect(url_for('login'))
     
     return render_template('register.html')
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    """Forgot password route - sends reset email"""
+    if request.method == 'POST':
+        email = request.form.get('email')
+        
+        user = User.query.filter_by(email=email).first()
+        
+        if user:
+            # Generate reset token
+            reset_token = secrets.token_urlsafe(32)
+            reset_token_expiration = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+            
+            user.reset_token = reset_token
+            user.reset_token_expiration = reset_token_expiration
+            db.session.commit()
+            
+            # Send reset email
+            try:
+                reset_url = url_for('reset_password', token=reset_token, _external=True)
+                msg = Message('Password Reset Request',
+                            recipients=[email])
+                msg.body = f'''To reset your password, visit the following link:
+{reset_url}
+
+If you did not make this request, simply ignore this email and no changes will be made.
+'''
+                mail.send(msg)
+                
+                return render_template('forgot_password.html', 
+                                     success='Password reset link has been sent to your email.')
+            except Exception as e:
+                return render_template('forgot_password.html', 
+                                     error='Failed to send email. Please try again later.')
+        else:
+            # Don't reveal if email exists or not for security
+            return render_template('forgot_password.html', 
+                                 success='If an account exists with this email, a password reset link has been sent.')
+    
+    return render_template('forgot_password.html')
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    """Reset password route"""
+    user = User.query.filter_by(reset_token=token).first()
+    
+    if not user or user.reset_token_expiration < datetime.datetime.utcnow():
+        return render_template('reset_password.html', 
+                             error='Invalid or expired reset link. Please request a new one.')
+    
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if new_password != confirm_password:
+            return render_template('reset_password.html', 
+                                 error='Passwords do not match.')
+        
+        if len(new_password) < 6:
+            return render_template('reset_password.html', 
+                                 error='Password must be at least 6 characters long.')
+        
+        # Update password
+        user.password_hash = generate_password_hash(new_password)
+        user.reset_token = None
+        user.reset_token_expiration = None
+        db.session.commit()
+        
+        return render_template('reset_password.html', 
+                             success='Password has been reset successfully. You can now login with your new password.')
+    
+    return render_template('reset_password.html', token=token)
 
 @app.route('/logout')
 @login_required
